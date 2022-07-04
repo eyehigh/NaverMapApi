@@ -159,7 +159,38 @@ namespace NaverMapApp.Logic
             /// 필수 여부 : N
             ///  마커 종류별 스타일 및 위치 지정
             /// </summary>
-            public string? Markers;
+            public List<Marker>? Markers;
+            public class Marker
+            {
+                public string type = "d"; //마커유형
+                                          //필수여부 : N, 기본값 : d
+                                          // d(default), n(number), a(alphabet), t(tooltip)
+                                          //설정 예) type:d 또는 type:n
+                public string size = "mid"; //마커 크기
+                                            //필수여부 : N, 기본값 : mid
+                                            //tiny일 경우 label 표현은 생략됨
+                                            //설정 예) size:tiny 또는 size:small
+                public string color = "0x08da76"; //색상
+                                                  //필수여부 : N, 기본값 : 없음
+                                                  //생략하면 기본 색상값인 0x08da76으로 표시
+                                                  //사전 정의 색상은 대표적으로 사용하는 색상을 쉽게 사용할 수 있도록 문자열로 정의한 값이며, 사전 정의 색상은 아래와 같음
+                                                  //- Default: 0x08DA76   //- Blue: 0x029DFF  //- Orange: 0xFE8C52
+                                                  //- Yellow: 0xFFBA01    //- Red: 0xFF6355    //- Brown: 0xA4885B
+                                                  //- Green: 0x63AA41     //- Purple: 0xD182C8    //- Gray: 0x666666
+                                                  //설정 예) color:green 또는 color:0x00FF00
+                public string? label;  //필수여부 : N, 기본값 : 없음
+                                       // A-Z, 0-9                    
+                                       // 생략하면 마커만 표시
+                                       // 설정 예) label:A, label:9
+                public string? pos; //마커가 표시될 위치이며 여러개 입력가능
+                                    //필수여부 : Y, 기본값 : 없음
+                                    // 설정 예) pos:127.15(공백)38.15,126.12(공백)37.523
+                public string viewSizeRatio ="1.0"; //마커 유형(type)과 크기(size)별 기본 디자인 기반으로 마커의 크기 조절
+                                            // -소수점 1자리만 지원 // - 0.1보다 작으면 0.1, 2.0보다 크면 2.0으로 설정
+                                            // 필수여부 : N, 기본값 : 1.0
+                                            // 설정 예) viewSizeRatio:2.0
+
+            }
 
             /// <summary>
             /// 라벨 언어 설정이며 입력 가능한 값은 다음과 같음
@@ -200,7 +231,7 @@ namespace NaverMapApp.Logic
                 MapType = MAPTYPE.basic;
                 Format = FORMAT.jpg;
                 Scale = 1;
-                Markers = null;
+                Markers = new List<Marker>();
                 Lang = LANG.ko;
                 Public_Transit = false;
                 DataVersion = null;
@@ -248,7 +279,7 @@ namespace NaverMapApp.Logic
                     param_count++;
 
                 }
-                else if (Center == null && Markers == null)
+                else if (Center == null && Markers.Count > 0)
                 {
                     msg = "ERROR : Center 누락(Center 설정 또는 Marker 설정 필요)";
                     return false;
@@ -263,7 +294,7 @@ namespace NaverMapApp.Logic
                 }
                 else
                 {
-                    if (Markers == null)
+                    if (Markers.Count == 0)
                     {
                         msg = "ERROR : Level 누락";
                         return false;
@@ -309,12 +340,11 @@ namespace NaverMapApp.Logic
                     sb.Append(Scale);
                     param_count++;
                 }
-                if (Markers != null)
+                if (Markers.Count > 0)
                 {
                     if (param_count > 0)
                         sb.Append('&');
-                    sb.Append("markers=");
-                    sb.Append(Markers);
+                    sb.Append(GetMarkersString());
                     param_count++;
                 }
                 if (Lang != LANG.ko)
@@ -340,7 +370,39 @@ namespace NaverMapApp.Logic
                 msg = "OK";
                 return true;
             }
+            public string GetMarkersString()
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int i=0; i< Markers.Count; i++)
+                {
+                    if(i !=0)
+                        sb.Append("&");
+                    sb.Append("markers=");
+                    sb.Append("type:");
+                    sb.Append(Markers[i].type);
 
+                    sb.Append("|");
+                    sb.Append("size:");
+                    sb.Append(Markers[i].size);
+
+                    sb.Append("|");
+                    sb.Append("color:");
+                    sb.Append(Markers[i].color);
+
+                    sb.Append("|");
+                    sb.Append("label:");
+                    sb.Append(Markers[i].label);
+
+                    sb.Append("|");
+                    sb.Append("pos:");
+                    sb.Append(Markers[i].pos);
+
+                    sb.Append("|");
+                    sb.Append("viewSizeRatio:");
+                    sb.Append(Markers[i].viewSizeRatio);
+                }
+                return sb.ToString();
+            }
             public bool Request()
             {
                 if (Url == null)
@@ -462,7 +524,100 @@ namespace NaverMapApp.Logic
                 response.Close();
             }
 
+            public void Static_Map_Sample_1()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+            }
+            public void Static_Map_Sample_2()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 11;
+                MapType = MAPTYPE.basic; //일반 지도 요청, 생략가능
+            }
+            public void Static_Map_Sample_3()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 11;
+                MapType = MAPTYPE.traffic; // 교통 정보 지도 요청
+            }
+            public void Static_Map_Sample_4()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 11;
+                MapType = MAPTYPE.satellite; //위성 지도 요청
+            }
+            public void Static_Map_Sample_5()
+            {
+                
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 11;
+                MapType = MAPTYPE.satellite_base; //위성 배경 지도 요청
+            }
+            public void Static_Map_Sample_6()
+            {
 
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+                Format = FORMAT.jpg; //jpeg(jpg) 이미지 형식 요청
+            }
+            public void Static_Map_Sample_7()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+                Format = FORMAT.png8; //png8 이미지 형식 요청
+            }
+            public void Static_Map_Sample_8()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+                Format = FORMAT.png; //png 이미지 형식 요청
+            }
+            public void Static_Map_Sample_9()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+                Scale = 1; //저해상도용 이미지 요청.
+                           //요청한 w, h 크기(픽셀 단위)의 이미지를 256 x 256 타일 기반으로 생성해서 반환합니다.
+                           //이 값이 기본값이며, 생략할 수 있습니다.
+            }
+            public void Static_Map_Sample_10()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("127.1054221", "37.3591614");
+                Level = 16;
+                Scale = 2; //고해상도용 이미지 요청. 
+                           //요청한 w, h 크기의 이미지를 512 x 512 타일 기반으로 생성해서 반환합니다. 
+                           //즉, scale=1과 동일한 지도 서비스 지역이 반환되지만 각 크기에 포함되는 픽셀은 2배로 늘어납니다.
+                           //예들 들어, 320 x 320이 요청되면 640 x 640 이미지를 반환합니다.
+            }
+            public void Static_Map_Sample_11()
+            {
+                Crs = CRS.WGS84; // EPSG:4326, 기본값 생략가능
+                Size = new SIZE("375", "258");
+                Center = new CENTER("126.96311062857343", "37.50843783043817");
+                Level = 16;
+                Lang = LANG.ko; //생략가능
+                                //LANG.en;
+                                //LANG.jp;
+                                //LANG.zh;
+            }
+            public void Static_Map_Sample_12()
+            {
+                Size = new SIZE("300", "300");
+                Center = new CENTER("126.96311062857343", "37.50843783043817");
+                Level = 16;
+                Public_Transit = true;
+            }
             #endregion SAMPLE
         }
 

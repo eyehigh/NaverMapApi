@@ -5,14 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NaverMapApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="768" Width="1024">
     <Grid>
         <Grid x:Name="Gird1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
-                <RowDefinition Height="4*"/>
+                <RowDefinition Height="9*"/>
             </Grid.RowDefinitions>
             <Button x:Name="btn_StaticMapRequest"  Grid.Column="0"  Content="StaticMapRequest" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+            <Image x:Name="Map_image" HorizontalAlignment="Left" Height="650" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="650"  Stretch="Fill"/>
         </Grid>
 
     </Grid>
