@@ -53,7 +53,7 @@ namespace NaverMapApp
 
             //staticMap.Static_Map_Sample_1();
             //staticMap.Static_Map_Sample_2();
-            staticMap.Static_Map_Sample_12();
+            staticMap.Static_Map_Sample_19();
             bool check = staticMap.SetUrl(out string msg);
 
             if (!check)

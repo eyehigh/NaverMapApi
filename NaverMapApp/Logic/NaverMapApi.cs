@@ -162,22 +162,51 @@ namespace NaverMapApp.Logic
             public List<Marker>? Markers;
             public class Marker
             {
-                public string type = "d"; //마커유형
+                public TYPE type = TYPE.d; //마커유형
                                           //필수여부 : N, 기본값 : d
                                           // d(default), n(number), a(alphabet), t(tooltip)
                                           //설정 예) type:d 또는 type:n
-                public string size = "mid"; //마커 크기
+                public enum TYPE
+                {
+                    d,
+                    n,
+                    a,
+                    t,
+                    e
+                }
+                public SIZE size = SIZE.mid; //마커 크기
                                             //필수여부 : N, 기본값 : mid
+                                            //tiny, small, mid
                                             //tiny일 경우 label 표현은 생략됨
                                             //설정 예) size:tiny 또는 size:small
-                public string color = "0x08da76"; //색상
-                                                  //필수여부 : N, 기본값 : 없음
-                                                  //생략하면 기본 색상값인 0x08da76으로 표시
-                                                  //사전 정의 색상은 대표적으로 사용하는 색상을 쉽게 사용할 수 있도록 문자열로 정의한 값이며, 사전 정의 색상은 아래와 같음
-                                                  //- Default: 0x08DA76   //- Blue: 0x029DFF  //- Orange: 0xFE8C52
-                                                  //- Yellow: 0xFFBA01    //- Red: 0xFF6355    //- Brown: 0xA4885B
-                                                  //- Green: 0x63AA41     //- Purple: 0xD182C8    //- Gray: 0x666666
-                                                  //설정 예) color:green 또는 color:0x00FF00
+                public enum SIZE
+                {
+                    tiny,
+                    small,
+                    mid,
+                }
+                public COLOR color = COLOR.Default; //색상
+                                                    //필수여부 : N, 기본값 : 없음
+                                                    //생략하면 기본 색상값인 0x08da76으로 표시
+                                                    //사전 정의 색상은 대표적으로 사용하는 색상을 쉽게 사용할 수 있도록 문자열로 정의한 값이며, 사전 정의 색상은 아래와 같음
+                                                    //- Default: 0x08DA76   //- Blue: 0x029DFF  //- Orange: 0xFE8C52
+                                                    //- Yellow: 0xFFBA01    //- Red: 0xFF6355    //- Brown: 0xA4885B
+                                                    //- Green: 0x63AA41     //- Purple: 0xD182C8    //- Gray: 0x666666
+                                                    //설정 예) color:green 또는 color:0x00FF00
+                public string custom_color;
+                public enum COLOR
+                {
+                    Default,
+                    Blue,
+                    Orange,
+                    Yellow,
+                    Red,
+                    Brown,
+                    Green,
+                    Purple,
+                    Gray,
+                    Custom
+                }
                 public string? label;  //필수여부 : N, 기본값 : 없음
                                        // A-Z, 0-9                    
                                        // 생략하면 마커만 표시
@@ -186,9 +215,31 @@ namespace NaverMapApp.Logic
                                     //필수여부 : Y, 기본값 : 없음
                                     // 설정 예) pos:127.15(공백)38.15,126.12(공백)37.523
                 public string viewSizeRatio ="1.0"; //마커 유형(type)과 크기(size)별 기본 디자인 기반으로 마커의 크기 조절
-                                            // -소수점 1자리만 지원 // - 0.1보다 작으면 0.1, 2.0보다 크면 2.0으로 설정
-                                            // 필수여부 : N, 기본값 : 1.0
-                                            // 설정 예) viewSizeRatio:2.0
+                                                    // -소수점 1자리만 지원 // - 0.1보다 작으면 0.1, 2.0보다 크면 2.0으로 설정
+                                                    // 필수여부 : N, 기본값 : 1.0
+                                                    // 설정 예) viewSizeRatio:2.0
+
+                //------------------ type:e ---------------------//
+                public string? icon;    // URL 경로이며 png, svg 타입 지원
+                                        //필수여부 : Y, 기본값 : 없음
+                                        // 설정 예) icon:http://aaa/bbb.svg    icon:http://aaa/bbb.png
+                public string? anchor = "bottom";  //지도 이미지에서 마커 이미지 위치의 오프셋값이며, 마커 표시 위치를 세부적으로 조정해야 할 때 설정
+                                        //double 또는 text 타입으로 설정 가능
+                                        //double 타입으로 입력할 경우 소수점 이하 두 자리(0.00~1.00)까지 표현 가능하며,
+                                        //xOffset, yOffset 순서로 입력(예: 왼쪽 위는 0.0,0.0, 오른쪽 아래는 1.0,1.0)
+                                        //text 타입으로 입력할 경우 입력 가능한 값은 다음과 같음
+                                        //- top: 0.5, 0.0
+                                        //- bottom: 0.5, 1.0(기본값)
+                                        //- left: 0.0, 0.5
+                                        //- right: 1.0, 0.5
+                                        //- center: 0.5, 0.5
+                                        //- topleft: 0.0, 0.0
+                                        //- topright: 0.0, 1.0
+                                        //- bottomleft: 1.0, 0.0
+                                        //- bottomright: 1.0, 1.0
+                                        //예를 들어, 핀 모양의 아이콘일 경우 보통 이미지의 가운데 맨 아래쪽을 위치로 표시하므로,
+                                        //double형으로 입력할 때는 double:0.5,1.0으로 입력하고, text형으로 입력할 때는 text:bottom으로 입력
+                                        // 설정 예) anchor:0.5,0.0 또는 anchor:top
 
             }
 
@@ -279,7 +330,7 @@ namespace NaverMapApp.Logic
                     param_count++;
 
                 }
-                else if (Center == null && Markers.Count > 0)
+                else if (Center == null && Markers.Count == 0)
                 {
                     msg = "ERROR : Center 누락(Center 설정 또는 Marker 설정 필요)";
                     return false;
@@ -377,31 +428,69 @@ namespace NaverMapApp.Logic
                 {
                     if(i !=0)
                         sb.Append("&");
-                    sb.Append("markers=");
-                    sb.Append("type:");
-                    sb.Append(Markers[i].type);
+                    
 
-                    sb.Append("|");
-                    sb.Append("size:");
-                    sb.Append(Markers[i].size);
+                    if (Markers[i].type != Marker.TYPE.e)
+                    {
+                        sb.Append("markers=");
+                        sb.Append("type:");
+                        sb.Append(Enum.GetName(typeof(Marker.TYPE), Markers[i].type));
 
-                    sb.Append("|");
-                    sb.Append("color:");
-                    sb.Append(Markers[i].color);
+                        sb.Append("|");
+                        sb.Append("size:");
+                        sb.Append(Enum.GetName(typeof(Marker.SIZE), Markers[i].size));
 
-                    sb.Append("|");
-                    sb.Append("label:");
-                    sb.Append(Markers[i].label);
+                        sb.Append("|");
+                        sb.Append("color:");
+                        if (Markers[i].color != Marker.COLOR.Custom)
+                        {
+                            sb.Append(Enum.GetName(typeof(Marker.COLOR), Markers[i].color));
+                        }
+                        else
+                        {
+                            sb.Append(Markers[i].custom_color);
+                        }
 
-                    sb.Append("|");
-                    sb.Append("pos:");
-                    sb.Append(Markers[i].pos);
 
-                    sb.Append("|");
-                    sb.Append("viewSizeRatio:");
-                    sb.Append(Markers[i].viewSizeRatio);
+                        if (Markers[i].label != null)
+                        {
+                            sb.Append("|");
+                            sb.Append("label:");
+                            sb.Append(Markers[i].label);
+                        }
+
+                        sb.Append("|");
+                        sb.Append("pos:");
+                        sb.Append(Markers[i].pos);
+
+                        sb.Append("|");
+                        sb.Append("viewSizeRatio:");
+                        sb.Append(Markers[i].viewSizeRatio);
+                    }
+                    else
+                    {
+                        sb.Append("markers=");
+                        sb.Append("type:");
+                        sb.Append(Enum.GetName(typeof(Marker.TYPE), Markers[i].type));
+
+                        sb.Append("|");
+                        sb.Append("icon:");
+                        sb.Append(Markers[i].icon);
+
+                        sb.Append("|");
+                        sb.Append("anchor:");
+                        sb.Append(Markers[i].anchor);
+
+                        sb.Append("|");
+                        sb.Append("pos:");
+                        sb.Append(Markers[i].pos);
+                    }
                 }
                 return sb.ToString();
+            }
+            public void AddMarker(Marker marker)
+            {
+                Markers.Add(marker);
             }
             public bool Request()
             {
@@ -618,8 +707,176 @@ namespace NaverMapApp.Logic
                 Level = 16;
                 Public_Transit = true;
             }
-            #endregion SAMPLE
-        }
+            public void Static_Map_Sample_13()
+            {
+                Size = new SIZE("300", "300");
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.d;
+                marker.size = Marker.SIZE.tiny;
+                marker.pos = "127.1054221 37.3591614";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_14()
+            {
+                Size = new SIZE("300", "300");
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.d;
+                marker.size = Marker.SIZE.mid;
+                marker.pos = "126.9865479 37.5612557";
+                AddMarker(marker);
+
+                marker = new Marker();
+                marker.type = Marker.TYPE.d;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Red;
+                marker.pos = "126.9870479 37.5695075,126.9950680 37.5612557,126.9743160 37.5620754";
+                AddMarker(marker);
+
+                marker = new Marker();
+                marker.type = Marker.TYPE.d;
+                marker.size = Marker.SIZE.tiny;
+                marker.color = Marker.COLOR.Green;
+                marker.pos = "126.9810479 37.5695075,126.9950680 37.5672557,126.9843160 37.5570754";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_15()
+            {
+                Size = new SIZE("300", "300");
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.d;
+                marker.size = Marker.SIZE.mid;
+                marker.pos = "127.1054221 37.3591614";
+                marker.viewSizeRatio = "2.0";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_16()
+            {
+                
+                Size = new SIZE("300", "300");
+
+                //markers=type:n|size:mid|pos:126.9865479%2037.5612557|label:1
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.n;
+                marker.size = Marker.SIZE.mid;
+                marker.pos = "126.9865479 37.5612557";
+                marker.label = "1";
+                AddMarker(marker);
+
+                //markers = type:n | size:small | color:blue | pos:126.9870479 % 2037.5695075 | label:2
+                marker = new Marker();
+                marker.type = Marker.TYPE.n;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9870479 37.5695075";
+                marker.label = "2";
+                AddMarker(marker);
+
+                //markers=type:n|size:small|color:blue|pos:126.9950680%2037.5612557|label:3
+                marker = new Marker();
+                marker.type = Marker.TYPE.n;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9950680 37.5612557";
+                marker.label = "3";
+                AddMarker(marker);
+
+                //markers=type:n|size:small|color:blue|pos:126.9743160%2037.5620754|label:4
+                marker = new Marker();
+                marker.type = Marker.TYPE.n;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9743160 37.5620754";
+                marker.label = "4";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_17()
+            {
+
+                Size = new SIZE("300", "300");
+
+                //markers = type:a | size:mid | pos:126.9865479 % 2037.5612557 | label:a 
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.a;
+                marker.size = Marker.SIZE.mid;
+                marker.pos = "126.9865479 37.5612557";
+                marker.label = "a";
+                AddMarker(marker);
+
+                //markers = type:a | size:small | color:blue | pos:126.9870479 % 2037.5695075 | label:b
+                marker = new Marker();
+                marker.type = Marker.TYPE.a;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9870479 37.5695075";
+                marker.label = "b";
+                AddMarker(marker);
+
+                //markers = type:a | size:small | color:blue | pos:126.9950680 % 2037.5612557 | label:c
+                marker = new Marker();
+                marker.type = Marker.TYPE.a;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9950680 37.5612557";
+                marker.label = "c";
+                AddMarker(marker);
+
+                //markers = type:a | size:small | color:blue | pos:126.9743160 % 2037.5620754 | label:d
+                marker = new Marker();
+                marker.type = Marker.TYPE.a;
+                marker.size = Marker.SIZE.small;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.9743160 37.5620754";
+                marker.label = "d";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_18()
+            {
+                //crs=EPSG:4326&scale=1&format=png&w=375&h=258
+                Crs = CRS.WGS84;
+                Scale = 1;
+                Format = FORMAT.png;
+                Size = new SIZE("375", "258");
+
+                //markers=type:t|pos:126.9616187%2037.507435|label:%EB%8F%99%EC%9E%91%EA%B5%AC,%20%EC%84%9C%EC%B4%88%EA%B5%AC,%20%EA%B4%80%EC%95%85%EA%B5%AC
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.t;
+                marker.pos = "126.9616187 37.507435";
+                marker.label = "동작구, 서초구, 관악구";
+                AddMarker(marker);
+
+                //markers=type:t|color:blue|pos:126.96060539999999%2037.507685699999996|label:%EB%8F%99%EC%9E%91%EA%B5%AC,%20%EC%84%9C%EC%B4%88%EA%B5%AC,%20%EC%9A%A9%EC%82%B0%EA%B5%AC%20%EB%B0%A9%EB%A9%B4
+                marker = new Marker();
+                marker.type = Marker.TYPE.t;
+                marker.color = Marker.COLOR.Blue;
+                marker.pos = "126.96060539999999 37.507685699999996";
+                marker.label = "동작구, 서초구, 용산구 방면";
+                AddMarker(marker);
+
+                //markers=type:t|color:0xEE3A3A|pos:126.9616377%2037.506708950000004|label:%EB%8F%99%EC%9E%91%EA%B5%AC,%20%EC%84%9C%EC%B4%88%EA%B5%AC,%20%EC%9A%A9%EC%82%B0%EA%B5%AC%20%EB%B0%A9%EB%A9%B4
+                marker = new Marker();
+                marker.type = Marker.TYPE.t;
+                marker.color = Marker.COLOR.Custom;
+                marker.custom_color = "0xEE3A3A";
+                marker.pos = "126.9616377 37.506708950000004";
+                marker.label = "동작구, 서초구, 용산구 방면";
+                AddMarker(marker);
+            }
+            public void Static_Map_Sample_19()
+            {
+                //w=300&h=300&scale=2 
+                Size = new SIZE("300", "300");
+                Scale = 2;
+
+                //markers=type:e|anchor:center|icon:https://aaa.bbb.com/icon/construction-medium@2x.png|pos:127.0597827%2037.5118871
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.e;
+                marker.anchor = "center";
+                marker.icon = "https://aaa.bbb.com/icon/construction-medium@2x.png";
+                marker.pos = "127.0597827 37.5118871";
+                AddMarker(marker);
+            }
+                #endregion SAMPLE
+            }
 
 
         
