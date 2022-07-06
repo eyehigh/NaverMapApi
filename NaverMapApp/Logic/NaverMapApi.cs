@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace NaverMapApp.Logic
@@ -875,11 +878,148 @@ namespace NaverMapApp.Logic
                 marker.pos = "127.0597827 37.5118871";
                 AddMarker(marker);
             }
-                #endregion SAMPLE
+            public void Static_Map_Sample_20()
+            {
+                //w=300&h=300&scale=2 
+                Size = new SIZE("300", "300");
+                Scale = 2;
+
+                //markers=type:e|anchor:center|icon:https://aaa.bbb.com/icon/construction-medium@2x.png|pos:127.0597827%2037.5118871
+                Marker marker = new Marker();
+                marker.type = Marker.TYPE.t;
+                marker.color = Marker.COLOR.Custom;
+                marker.custom_color = "0xEE3A3A";
+                marker.pos = "14124108.6000623 4497680.4883394";
+                AddMarker(marker);
             }
+            #endregion SAMPLE
+        }
 
 
-        
+        public class Geocode
+        {
+            public const string Url_ID_KEY = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode";
+            //public const string Url_HTTP_REFERER = "https://naveropenapi.apigw.ntruss.com/map-static/v2/raster-cors";
+
+            private const string Header_Client_ID = "X-NCP-APIGW-API-KEY-ID";
+            private string Client_ID = "";
+
+            private const string Header_Client_Secret = "X-NCP-APIGW-API-KEY";
+            private string Client_Secret = "";
+
+            public string? Url;
+            private WebResponse? response = null;
+
+            public string? query; // 주소
+                                  // 필수여부 : Y
+            public string? coordinate; //검색 중심 좌표 // 필수여부 : Y
+                                       // 'lon,lat' 형식으로 입력
+            public string? filter; // 검색 결과 필터링 조건 // 필수여부 : N
+                                   //'필터 타입@코드1;코드2;... ' 형식으로 입력
+                                   // 제공하는 필터 타입은 다음과 같음:
+                                   // HCODE: 행정동 코드
+                                   // BCODE: 법정동 코드
+                                   // 예) HCODE@4113554500;4113555000
+            public int page = 1;  //페이지 번호 // 필수여부 : N
+                                  // 기본값은 1
+            public int count = 10; // 결과 목록 크기 // 필수여부 : N
+                                   //입력 범위 : 1~100
+                                   //기본값 : 10
+            /*
+            public class Root
+            {
+                [JsonInclude]
+                public string status;
+                [JsonInclude]
+                public string meta;
+                [JsonInclude]
+                public List<Address> Addresses;
+            }
+            public class Address
+            {
+                [JsonInclude]
+                public string roadAddress;
+                [JsonInclude]
+                public string englishAddress;
+                [JsonInclude]
+                public string x;
+                [JsonInclude]
+                public string y;
+                [JsonInclude]
+                public double distance;
+
+                [JsonInclude]
+                public List<AddressElement> AddressElements;
+            }
+            public class AddressElement
+            {
+                [JsonInclude]
+                public string types;
+                [JsonInclude]
+                public string longName;
+                [JsonInclude]
+                public string shortName;
+                [JsonInclude]
+                public string code;
+            }*/
+
+                public bool SetKey(string p_Client_ID, string p_Client_Secret)
+            {
+                Client_ID = p_Client_ID;
+                Client_Secret = p_Client_Secret;
+
+                return true;
+            }
+            public bool SetUrl(out string msg)
+            {
+                msg = "";
+                return false;
+            }
+            public bool Request()
+            {
+                //if (Url == null)
+                //    return false;
+
+                WebRequest request = WebRequest.Create(Url_ID_KEY + "?query=분당구 불정로 6");
+                //request.
+                request.Headers.Add(Header_Client_ID, Client_ID);
+                request.Headers.Add(Header_Client_Secret, Client_Secret);
+
+                response = request.GetResponse();
+                Debug.WriteLine(((HttpWebResponse)response).StatusDescription);
+                Debug.WriteLine(((HttpWebResponse)response).StatusCode);
+
+                if (((HttpWebResponse)response).StatusCode == HttpStatusCode.OK)
+                {
+                    ResponseToJson();
+                    return true;
+                }
+                else
+                {
+                    response.Close();
+                    return false;
+                }
+            }
+            public void ResponseToJson()
+            {
+                //if (response == null)
+                //    return null;
+
+                using (StreamReader streamReader = new StreamReader(response.GetResponseStream()))
+                {
+                    //string result = streamReader.ReadToEnd();
+                    using(JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
+                    {
+                        JObject json = (JObject)JToken.ReadFrom(jsonTextReader);
+
+                        Debug.WriteLine(json.ToString());
+                    }
+                }
+                    
+                
+               // Debug.WriteLine(result);
+            }
+        }
 
 
         public class CommonError

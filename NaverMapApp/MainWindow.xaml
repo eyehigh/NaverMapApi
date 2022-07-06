@@ -14,6 +14,7 @@
             </Grid.RowDefinitions>
             <Button x:Name="btn_StaticMapRequest"  Grid.Column="0"  Content="StaticMapRequest" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
             <Image x:Name="Map_image" HorizontalAlignment="Left" Height="650" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="650"  Stretch="Fill"/>
+            <Button x:Name="btn_Geocode"  Grid.Column="0"  Content="geocode" HorizontalAlignment="Left" Margin="137,10,0,0" VerticalAlignment="Top"/>
         </Grid>
 
     </Grid>
