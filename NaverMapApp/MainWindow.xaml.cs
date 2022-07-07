@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static NaverMapApp.Logic.NaverMapApi;
+using static NaverMapApp.Logic.NaverMapApi.StaticMap;
 
 namespace NaverMapApp
 {
@@ -56,7 +57,64 @@ namespace NaverMapApp
 
         private void Btn_Geocode_Click(object sender, RoutedEventArgs e)
         {
-            geocode.Request();
+            geocode.query = "종로구 청와대로 1";
+
+            bool check = geocode.SetUrl(out string msg);
+            if (!check)
+            {
+                
+            }
+            else
+            {
+                if(geocode.Request())
+                {
+                    staticMap.Center = new StaticMap.CENTER(geocode.rootObjects.addresses[0].x, geocode.rootObjects.addresses[0].y);
+                    staticMap.Size = new StaticMap.SIZE("800", "600");
+                    staticMap.Level = 16;
+
+
+                    Marker marker = new Marker();
+                    marker.type = Marker.TYPE.t;
+                    marker.size = Marker.SIZE.mid;
+                    marker.color = Marker.COLOR.Blue;
+                    marker.pos = geocode.rootObjects.addresses[0].x +" " + geocode.rootObjects.addresses[0].y;
+                    marker.label = geocode.rootObjects.addresses[0].jibunAddress;
+                    staticMap.AddMarker(marker);
+
+                    check = staticMap.SetUrl(out string msg2);
+                    if (!check)
+                    {
+                        MessageBox.Show(msg2);
+                    }
+                    else
+                    {
+                        if (staticMap.Request())
+                        {
+                            string FileName = "geocode";
+                            staticMap.ResponseToFile(FileName);
+                            string Path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+                            if (staticMap.Format == StaticMap.FORMAT.jpg)
+                            {
+                                FileName = FileName + ".jpg";
+                            }
+                            else
+                            {
+                                FileName = FileName + ".png";
+                            }
+
+                            Path = System.IO.Path.GetDirectoryName(Path) + "\\" + FileName;
+
+
+                            Map_image.Source = imgFile.LoadImage(Path);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
         }
 
         private void Btn_StaticMapRequest_Click(object sender, RoutedEventArgs e)

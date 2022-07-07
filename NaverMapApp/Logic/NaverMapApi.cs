@@ -7,7 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace NaverMapApp.Logic
@@ -910,6 +913,8 @@ namespace NaverMapApp.Logic
             public string? Url;
             private WebResponse? response = null;
 
+            public Root? rootObjects = null;
+
             public string? query; // 주소
                                   // 필수여부 : Y
             public string? coordinate; //검색 중심 좌표 // 필수여부 : Y
@@ -925,43 +930,57 @@ namespace NaverMapApp.Logic
             public int count = 10; // 결과 목록 크기 // 필수여부 : N
                                    //입력 범위 : 1~100
                                    //기본값 : 10
-            /*
+            
             public class Root
             {
                 [JsonInclude]
-                public string status;
+                public string status; // 검색 결과 상태 코드 
                 [JsonInclude]
-                public string meta;
+                public Meta meta;  // 검색 메타 데이터
                 [JsonInclude]
-                public List<Address> Addresses;
+                public List<Address> addresses; // 주소 검색 결과 목록
+            }
+            public class Meta
+            {
+                [JsonInclude]
+                public int totalCount; // 총 검색 건수
+                [JsonInclude]
+                public int page;  // 현재 페이지 번호
+                [JsonInclude]
+                public int count; // 페이지 내 결과 개수
             }
             public class Address
             {
                 [JsonInclude]
-                public string roadAddress;
+                public string roadAddress; //도로명 주소
                 [JsonInclude]
-                public string englishAddress;
+                public string jibunAddress; //지번 주소
                 [JsonInclude]
-                public string x;
+                public string englishAddress; //영어 주소
                 [JsonInclude]
-                public string y;
+                public string x; // x 좌표(경도)
                 [JsonInclude]
-                public double distance;
+                public string y; // y 좌표(위도)
+                [JsonInclude]
+                public double distance; //검색 중심 좌표로부터의 거리(단위:미터)
 
                 [JsonInclude]
-                public List<AddressElement> AddressElements;
+                public List<AddressElement> addressElements; //주소를 이루는 요소들
+
+                [JsonInclude]
+                public string errorMessage;
             }
             public class AddressElement
             {
                 [JsonInclude]
-                public string types;
+                public string[] types;
                 [JsonInclude]
                 public string longName;
                 [JsonInclude]
                 public string shortName;
                 [JsonInclude]
                 public string code;
-            }*/
+            }
 
                 public bool SetKey(string p_Client_ID, string p_Client_Secret)
             {
@@ -973,14 +992,51 @@ namespace NaverMapApp.Logic
             public bool SetUrl(out string msg)
             {
                 msg = "";
-                return false;
+                StringBuilder sb = new();
+                sb.Append(Url_ID_KEY);
+                sb.Append('?');
+                if (query ==null)
+                {
+                    msg = "ERROR : 주소가 설정되지 않았습니다";
+                    return false;
+                }
+                sb.Append("query=");
+                sb.Append(query);
+
+                if(coordinate != null)
+                {
+                    sb.Append('&');
+                    sb.Append("coordinate=");
+                    sb.Append(coordinate);
+                }
+                if (filter != null)
+                {
+                    sb.Append('&');
+                    sb.Append("filter=");
+                    sb.Append(filter);
+                }
+                if (page != 1)
+                {
+                    sb.Append('&');
+                    sb.Append("page=");
+                    sb.Append(page);
+                }
+                if (count != 10)
+                {
+                    sb.Append('&');
+                    sb.Append("count=");
+                    sb.Append(count);
+                }
+                msg = "OK";
+                Url = sb.ToString();
+                return true;
             }
             public bool Request()
             {
-                //if (Url == null)
-                //    return false;
+                if (Url == null)
+                    return false;
 
-                WebRequest request = WebRequest.Create(Url_ID_KEY + "?query=분당구 불정로 6");
+                WebRequest request = WebRequest.Create(Url);
                 //request.
                 request.Headers.Add(Header_Client_ID, Client_ID);
                 request.Headers.Add(Header_Client_Secret, Client_Secret);
@@ -992,7 +1048,14 @@ namespace NaverMapApp.Logic
                 if (((HttpWebResponse)response).StatusCode == HttpStatusCode.OK)
                 {
                     ResponseToJson();
-                    return true;
+                    if (rootObjects != null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
@@ -1013,6 +1076,18 @@ namespace NaverMapApp.Logic
                         JObject json = (JObject)JToken.ReadFrom(jsonTextReader);
 
                         Debug.WriteLine(json.ToString());
+                        //Debug.WriteLine(json["addresses"][0]["y"]);
+
+                        TextEncoderSettings encoderSettings = new();
+                        encoderSettings.AllowRange(UnicodeRanges.All);
+                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                        {
+                            AllowTrailingCommas = true, // 데이터 후행의 쉼표 허용 여부
+                            WriteIndented = true,
+                            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(encoderSettings), // <-
+                        };
+
+                        rootObjects = System.Text.Json.JsonSerializer.Deserialize<Root>(json.ToString(), jsonSerializerOptions);
                     }
                 }
                     
