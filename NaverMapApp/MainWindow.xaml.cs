@@ -57,7 +57,7 @@ namespace NaverMapApp
 
         private void Btn_Geocode_Click(object sender, RoutedEventArgs e)
         {
-            geocode.query = "종로구 청와대로 1";
+            geocode.query = TextBox_Address.Text;//"종로구 청와대로 1";
 
             bool check = geocode.SetUrl(out string msg);
             if (!check)
